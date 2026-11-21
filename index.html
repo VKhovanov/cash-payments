@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#1f7a4d">
+<title>Cash Payments</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--g:#1f7a4d;--g2:#e8f5ee;--r:#b3261e;--r2:#fdecea;--t:#1d1d1f;--m:#6b6b70;--b:#e3e3e6;--bg:#f6f7f8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--t);font:16px/1.35 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--g);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px}
+header h1{font-size:19px;margin:0;flex:1;font-weight:600}
+header button{background:none;border:0;color:#fff;font-size:22px;padding:4px 8px}
+nav{display:flex;background:#fff;border-bottom:1px solid var(--b);position:sticky;top:52px;z-index:4}
+nav button{flex:1;border:0;background:none;padding:12px 0;font-size:15px;color:var(--m);border-bottom:3px solid transparent}
+nav button.on{color:var(--g);border-bottom-color:var(--g);font-weight:600}
+main{padding:14px 14px 120px;max-width:560px;margin:0 auto}
+.card{background:#fff;border:1px solid var(--b);border-radius:14px;padding:14px;margin-bottom:12px}
+.seg{display:flex;background:#eceef0;border-radius:12px;padding:4px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:10px;border-radius:9px;font-size:16px;color:var(--m)}
+.seg button.on.out{background:#fff;color:var(--r);font-weight:600;box-shadow:0 1px 3px #0002}
+.seg button.on.in{background:#fff;color:var(--g);font-weight:600;box-shadow:0 1px 3px #0002}
+.amt{display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--b);padding-bottom:4px}
+.amt input{flex:1;min-width:0;border:0;outline:0;font-size:38px;font-weight:600;background:none;color:var(--t)}
+.amt span{font-size:18px;color:var(--m)}
+label.l{display:block;font-size:13px;color:var(--m);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.03em}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--b);background:#fff;border-radius:20px;padding:8px 13px;font-size:15px;color:var(--t)}
+.chip.on{background:var(--g2);border-color:var(--g);color:var(--g);font-weight:600}
+.chip.more{color:var(--g);border-style:dashed}
+.sel{margin-top:10px;font-size:15px;color:var(--g);min-height:20px}
+input.f,select.f{width:100%;border:1px solid var(--b);border-radius:10px;padding:11px 12px;font-size:16px;background:#fff;color:var(--t)}
+.row{display:flex;gap:10px}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-weight:600;background:var(--g);color:#fff;margin-top:16px}
+.btn.sec{background:#fff;color:var(--g);border:1px solid var(--g)}
+.btn.del{background:#fff;color:var(--r);border:1px solid var(--r)}
+.btn:disabled{opacity:.45}
+.sum{display:flex;justify-content:space-between;font-size:15px;color:var(--m);margin-bottom:6px}
+.sum b{color:var(--t)}
+.day{font-size:13px;color:var(--m);margin:14px 2px 6px;text-transform:uppercase}
+.it{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--b);border-radius:12px;padding:11px 12px;margin-bottom:8px}
+.it .x{flex:1;min-width:0}
+.it .c{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .n{font-size:13px;color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .a{font-weight:600;white-space:nowrap}
+.it .a.out{color:var(--r)} .it .a.in{color:var(--g)}
+.it.sent{opacity:.6}
+.empty{text-align:center;color:var(--m);padding:30px 10px}
+.sendbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--b);padding:10px 14px calc(10px + env(safe-area-inset-bottom));z-index:6}
+.sendbar .btn{margin:0;max-width:532px;margin:0 auto}
+.ov{position:fixed;inset:0;background:#0006;z-index:20;display:none;align-items:flex-end;justify-content:center}
+.ov.on{display:flex}
+.sheet{background:#fff;width:100%;max-width:560px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+.sheet h2{font-size:18px;margin:2px 0 12px}
+.list button{display:flex;justify-content:space-between;width:100%;text-align:left;border:0;border-bottom:1px solid var(--b);background:none;padding:13px 4px;font-size:16px;color:var(--t)}
+.list button small{color:var(--m)}
+.muted{color:var(--m);font-size:14px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 18px;border-radius:20px;font-size:15px;opacity:0;transition:opacity .25s;z-index:30;pointer-events:none}
+.toast.on{opacity:1}
+textarea.f{width:100%;min-height:120px;border:1px solid var(--b);border-radius:10px;padding:10px;font:13px/1.3 monospace}
+.edit{background:#fff7e0;border:1px solid #f0d58a;border-radius:10px;padding:8px 12px;font-size:14px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<header><h1>Cash Payments</h1><button id="bSet" aria-label="Settings">⚙</button></header>
+<nav><button id="tAdd" class="on">Add</button><button id="tList">To send <span id="cnt"></span></button><button id="tHist">Sent</button></nav>
+<main>
+  <!-- ADD -->
+  <section id="vAdd">
+    <div id="editNote" class="edit" style="display:none">Editing a saved payment. <a href="#" id="cancelEdit">Cancel</a></div>
+    <div class="seg"><button id="kOut" class="out on">Spent</button><button id="kIn" class="in">Received</button></div>
+    <div class="card">
+      <div class="amt"><input id="amount" inputmode="decimal" placeholder="0.00" autocomplete="off"><span>AED</span></div>
+      <label class="l">Category</label>
+      <div class="chips" id="favs"></div>
+      <div class="sel" id="selTxt"></div>
+      <label class="l">Note (what / where)</label>
+      <input class="f" id="note" list="notes" placeholder="e.g. fish, Al Jubail market" autocomplete="off">
+      <datalist id="notes"></datalist>
+      <label class="l">Date and time</label>
+      <input class="f" id="when" type="datetime-local">
+      <button class="btn" id="save">Save</button>
+      <button class="btn del" id="delete" style="display:none">Delete this payment</button>
+    </div>
+  </section>
+  <!-- TO SEND -->
+  <section id="vList" style="display:none">
+    <div class="card"><div class="sum"><span>Not sent yet</span><b id="sCnt">0</b></div>
+      <div class="sum"><span>Spent</span><b id="sOut">0.00</b></div>
+      <div class="sum"><span>Received</span><b id="sIn">0.00</b></div></div>
+    <div id="lst"></div>
+  </section>
+  <!-- SENT -->
+  <section id="vHist" style="display:none">
+    <p class="muted">Payments already e-mailed. Tap one to send it again (the Excel import never adds the same payment twice).</p>
+    <div id="hst"></div>
+  </section>
+</main>
+<div class="sendbar" id="sendbar" style="display:none"><button class="btn" id="send">Send by e-mail</button></div>
+
+<!-- category picker -->
+<div class="ov" id="ovCat"><div class="sheet"><h2 id="catTitle">Choose category</h2><div class="list" id="catList"></div>
+<button class="btn sec" id="catBack" style="display:none">Back</button><button class="btn sec" id="catClose">Close</button></div></div>
+<!-- after send -->
+<div class="ov" id="ovSent"><div class="sheet"><h2>Did the e-mail go out?</h2>
+<p class="muted">Gmail should have opened with the letter ready. After you press Send in Gmail, come back here and confirm.</p>
+<button class="btn" id="yesSent">Yes, mark as sent</button>
+<button class="btn sec" id="notSent">Not yet</button>
+<p class="muted" style="margin-top:16px">Gmail did not open? Copy the letter and paste it into a new e-mail to <b id="mailTo"></b>, subject: <b id="mailSubj"></b></p>
+<button class="btn sec" id="copyBody">Copy letter text</button></div></div>
+<!-- history item -->
+<div class="ov" id="ovHist"><div class="sheet"><h2>Sent payment</h2><p id="hTxt"></p>
+<button class="btn" id="hAgain">Send again</button><button class="btn del" id="hDel">Remove from phone</button><button class="btn sec" id="hClose">Close</button></div></div>
+<!-- settings -->
+<div class="ov" id="ovSet"><div class="sheet"><h2>Settings</h2>
+<label class="l">Send e-mails to</label><input class="f" id="email" type="email" placeholder="name@gmail.com">
+<button class="btn" id="setSave">Save</button>
+<label class="l">Backup</label>
+<p class="muted">All payments are kept only on this phone. Copy a backup now and then (e.g. paste it into a note), and paste it back here to restore.</p>
+<button class="btn sec" id="bkCopy">Copy backup</button>
+<textarea class="f" id="bkText" placeholder="Paste a backup here to restore" style="margin-top:12px"></textarea>
+<button class="btn sec" id="bkRestore">Restore from pasted backup</button>
+<button class="btn sec" id="setClose">Close</button>
+<p class="muted" style="text-align:center;margin-top:14px">Cash Payments v1.0 · categories as in the Excel "categories" sheet</p></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const CATS = {
+ "Food":["Groceries","Market (fish, meat, fruit & veg)","Restaurants & cafes","Food delivery","Lunches at work","School catering","Bakery & sweets","Snacks & vending"],
+ "Housing":["Rent","Other housing"],
+ "Utilities":["Electricity & water","Telecom"],
+ "Transport":["Car lease","Fuel","Taxi","Public transport","Parking","Car wash"],
+ "Education":["School fees","School transport","School uniform"],
+ "Health":["Hospital & clinic","Pharmacy","Optics","Fitness & wellbeing"],
+ "Household & shopping":["Online shopping","Furniture & home","Electronics","Household goods","Books & stationery","Laundry & services"],
+ "Clothing & shoes":["Clothing","Shoes"],
+ "Personal care":["Beauty & salon","Perfume & cosmetics"],
+ "Subscriptions & software":["Apple","Google","AI tools","Software & hosting","Media & reading","LinkedIn"],
+ "Professional & education (adult)":["Memberships"],
+ "Government & fees":["Visas & Emirates ID","Fines & municipal fees","Other government services"],
+ "Travel":["Flights","Hotels","Spending abroad","Travel visas"],
+ "Leisure":["Attractions & clubs","Entertainment"],
+ "Gifts & donations":["Gifts","Flowers"],
+ "Transfers to people":["Other transfers"],
+ "Investments":["Real estate"],
+ "Other":["Other"],
+ "Income":["Salary","Other income"],
+ "Loans & repayments":["Loan repayment received"],
+ "Debt to Mariia":["Debt to Mariia"],
+ "Bank & card fees":["Bank fees"],
+ "Cash":["ATM withdrawal","Cash deposit"],
+ "Excluded":["Excluded"]
+};
+const DEF_FAV = {
+ out:[["Food","Market (fish, meat, fruit & veg)"],["Food","Groceries"],["Food","Bakery & sweets"],["Food","Restaurants & cafes"],["Transport","Parking"],["Transport","Car wash"],["Transport","Taxi"],["Household & shopping","Household goods"],["Gifts & donations","Gifts"]],
+ in:[["Income","Other income"],["Loans & repayments","Loan repayment received"],["Debt to Mariia","Debt to Mariia"],["Cash","ATM withdrawal"]]
+};
+const KEY = 'cashpay.v1', MAXREC = 70;
+const $ = id => document.getElementById(id);
+const short = s => s.replace(/ \(.*\)$/, '');
+const pad = n => String(n).padStart(2, '0');
+const localIso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const fmt = n => n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const dmy = iso => iso.slice(8,10) + '.' + iso.slice(5,7) + '.' + iso.slice(0,4);
+
+let S = {email:'', items:[], usage:{}, notes:{}};
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Could not save on this phone!'); } }
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+
+let kind = 'out', sel = null, editId = null, histId = null, batch = null;
+
+function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(()=>e.classList.remove('on'), 1800); }
+function newId(d){ const r = Math.random().toString(36).slice(2,5);
+  return `cash-${String(d.getFullYear()).slice(2)}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}-${r}`; }
+
+function favList(){
+  const u = Object.entries(S.usage).filter(([k]) => k.startsWith(kind + '|')).sort((a,b) => b[1]-a[1]).map(([k]) => k.split('|').slice(1));
+  const out = []; const seen = new Set();
+  for (const p of u.concat(DEF_FAV[kind])) { const k = p.join('|'); if (!seen.has(k) && CATS[p[0]] && CATS[p[0]].includes(p[1])) { seen.add(k); out.push(p); } if (out.length >= 9) break; }
+  return out;
+}
+function renderFavs(){
+  const box = $('favs'); box.innerHTML = '';
+  for (const [c,s] of favList()) {
+    const b = document.createElement('button'); b.className = 'chip' + (sel && sel[0]===c && sel[1]===s ? ' on' : ''); b.textContent = short(s);
+    b.onclick = () => { sel = [c,s]; renderFavs(); }; box.appendChild(b);
+  }
+  if (sel && !favList().some(p => p[0]===sel[0] && p[1]===sel[1])) {
+    const b = document.createElement('button'); b.className = 'chip on'; b.textContent = short(sel[1]); box.appendChild(b);
+  }
+  const m = document.createElement('button'); m.className = 'chip more'; m.textContent = 'All categories…'; m.onclick = openCats; box.appendChild(m);
+  $('selTxt').textContent = sel ? sel[0] + ' › ' + sel[1] : 'Tap a category';
+  const dl = $('notes'); dl.innerHTML = '';
+  const ns = sel ? (S.notes[sel.join('|')] || []) : [];
+  for (const n of ns) { const o = document.createElement('option'); o.value = n; dl.appendChild(o); }
+}
+function setKind(k){ kind = k; $('kOut').classList.toggle('on', k==='out'); $('kIn').classList.toggle('on', k==='in'); if (!editId) sel = null; renderFavs(); }
+$('kOut').onclick = () => setKind('out'); $('kIn').onclick = () => setKind('in');
+
+function openCats(){ showCats(); $('ovCat').classList.add('on'); }
+function showCats(){
+  $('catTitle').textContent = 'Choose category'; $('catBack').style.display = 'none';
+  const L = $('catList'); L.innerHTML = '';
+  for (const c of Object.keys(CATS)) { const b = document.createElement('button'); b.innerHTML = `<span>${c}</span><small>${CATS[c].length} ›</small>`;
+    b.onclick = () => showSubs(c); L.appendChild(b); }
+}
+function showSubs(c){
+  $('catTitle').textContent = c; $('catBack').style.display = 'block';
+  const L = $('catList'); L.innerHTML = '';
+  for (const s of CATS[c]) { const b = document.createElement('button'); b.innerHTML = `<span>${s}</span>`;
+    b.onclick = () => { sel = [c,s]; $('ovCat').classList.remove('on'); renderFavs(); }; L.appendChild(b); }
+}
+$('catBack').onclick = showCats; $('catClose').onclick = () => $('ovCat').classList.remove('on');
+
+function parseAmt(v){ v = (v||'').replace(/\s/g,'').replace(',', '.'); if (!/^\d+(\.\d{1,2})?$/.test(v)) return null; const n = Math.round(parseFloat(v)*100)/100; return n > 0 ? n : null; }
+
+function resetForm(){ editId = null; $('amount').value = ''; $('note').value = ''; $('when').value = localIso(new Date()); sel = null;
+  $('save').textContent = 'Save'; $('delete').style.display = 'none'; $('editNote').style.display = 'none'; renderFavs(); }
+
+$('save').onclick = () => {
+  const a = parseAmt($('amount').value); if (!a) { toast('Enter the amount'); $('amount').focus(); return; }
+  if (!sel) { toast('Choose a category'); return; }
+  const w = $('when').value; if (!w) { toast('Enter date and time'); return; }
+  const note = $('note').value.trim().replace(/\s+/g, ' ');
+  const rec = {type:kind, amount:a, cat:sel[0], sub:sel[1], note, date:w};
+  if (editId) { const it = S.items.find(x => x.id === editId); Object.assign(it, rec); toast('Updated'); }
+  else { S.items.push(Object.assign({id:newId(new Date()), created:new Date().toISOString(), sent:null}, rec)); toast('Saved: ' + fmt(a) + ' AED'); }
+  const k = kind + '|' + sel.join('|'); S.usage[k] = (S.usage[k]||0) + 1;
+  if (note) { const nk = sel.join('|'); const arr = (S.notes[nk] || []).filter(x => x !== note); arr.unshift(note); S.notes[nk] = arr.slice(0, 12); }
+  persist(); const wasEdit = !!editId; resetForm(); refresh(); if (wasEdit) tab('list');
+};
+$('delete').onclick = () => { if (!editId) return; S.items = S.items.filter(x => x.id !== editId); persist(); toast('Deleted'); resetForm(); refresh(); tab('list'); };
+$('cancelEdit').onclick = e => { e.preventDefault(); resetForm(); tab('list'); };
+
+function edit(id){
+  const it = S.items.find(x => x.id === id); if (!it) return;
+  editId = id; kind = it.type; $('kOut').classList.toggle('on', kind==='out'); $('kIn').classList.toggle('on', kind==='in');
+  sel = [it.cat, it.sub]; $('amount').value = it.amount.toFixed(2); $('note').value = it.note; $('when').value = it.date;
+  $('save').textContent = 'Save changes'; $('delete').style.display = 'block'; $('editNote').style.display = 'block'; renderFavs(); tab('add');
+}
+
+function itemEl(it, onclick){
+  const d = document.createElement('div'); d.className = 'it' + (it.sent ? ' sent' : '');
+  d.innerHTML = `<div class="x"><div class="c"></div><div class="n"></div></div><div class="a ${it.type}"></div>`;
+  d.querySelector('.c').textContent = short(it.sub) + (it.cat !== 'Food' && it.cat !== 'Transport' ? ' · ' + it.cat : '');
+  d.querySelector('.n').textContent = it.date.slice(11) + (it.note ? ' · ' + it.note : '') + (it.sent ? ' · sent ' + dmy(it.sent.slice(0,10)) : '');
+  d.querySelector('.a').textContent = (it.type === 'out' ? '−' : '+') + fmt(it.amount);
+  d.onclick = onclick; return d;
+}
+function grouped(box, items, onclick){
+  box.innerHTML = ''; let day = '';
+  for (const it of items) { const dd = it.date.slice(0,10); if (dd !== day) { day = dd; const h = document.createElement('div'); h.className = 'day'; h.textContent = dmy(dd); box.appendChild(h); }
+    box.appendChild(itemEl(it, () => onclick(it.id))); }
+}
+function refresh(){
+  const un = S.items.filter(x => !x.sent).sort((a,b) => b.date.localeCompare(a.date));
+  $('cnt').textContent = un.length ? '(' + un.length + ')' : '';
+  $('sCnt').textContent = un.length;
+  $('sOut').textContent = fmt(un.filter(x=>x.type==='out').reduce((s,x)=>s+x.amount,0)) + ' AED';
+  $('sIn').textContent = fmt(un.filter(x=>x.type==='in').reduce((s,x)=>s+x.amount,0)) + ' AED';
+  if (un.length) grouped($('lst'), un, edit); else $('lst').innerHTML = '<div class="empty">Nothing to send. New payments appear here.</div>';
+  const se = S.items.filter(x => x.sent).sort((a,b) => b.date.localeCompare(a.date)).slice(0, 300);
+  if (se.length) grouped($('hst'), se, openHist); else $('hst').innerHTML = '<div class="empty">No payments sent yet.</div>';
+  $('send').textContent = un.length ? `Send by e-mail (${Math.min(un.length, MAXREC)})` : 'Send by e-mail';
+  $('send').disabled = !un.length;
+}
+
+function tab(t){
+  for (const [b,v,k] of [['tAdd','vAdd','add'],['tList','vList','list'],['tHist','vHist','hist']]) { $(b).classList.toggle('on', t===k); $(v).style.display = t===k ? '' : 'none'; }
+  $('sendbar').style.display = t === 'list' ? '' : 'none';
+}
+$('tAdd').onclick = () => tab('add'); $('tList').onclick = () => tab('list'); $('tHist').onclick = () => tab('hist');
+
+// ---- e-mail (format read by _automation/process_alerts.py: keep in step) ----
+function buildMail(items){
+  const out = items.filter(x=>x.type==='out').reduce((s,x)=>s+x.amount,0), inn = items.filter(x=>x.type==='in').reduce((s,x)=>s+x.amount,0);
+  const now = new Date();
+  const subject = `Cash txn | ${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()} | ${items.length} record${items.length>1?'s':''} | out ${fmt(out)} AED`;
+  const L = ['CASH-TX v1', `Records: ${items.length}`, `Total out: ${out.toFixed(2)} AED`, `Total in: ${inn.toFixed(2)} AED`, ''];
+  items.forEach((it, i) => {
+    L.push(`TX ${i+1}`, `id: ${it.id}`, `date: ${it.date.replace('T',' ')}`, `type: ${it.type}`, `amount: ${it.amount.toFixed(2)}`, 'currency: AED',
+           `category: ${it.cat}`, `subcategory: ${it.sub}`, `note: ${it.note.replace(/[\r\n]+/g,' ')}`, '');
+  });
+  L.push('END', '', 'Sent by the Cash Payments phone app.');
+  return {subject, body: L.join('\r\n')};
+}
+$('send').onclick = () => {
+  if (!S.email) { toast('Enter your e-mail address first'); openSet(); return; }
+  const un = S.items.filter(x => !x.sent).sort((a,b) => a.date.localeCompare(b.date)).slice(0, MAXREC);
+  if (!un.length) return;
+  batch = {ids: un.map(x=>x.id), mail: buildMail(un)};
+  $('mailTo').textContent = S.email; $('mailSubj').textContent = batch.mail.subject;
+  $('ovSent').classList.add('on');
+  location.href = 'mailto:' + encodeURIComponent(S.email) + '?subject=' + encodeURIComponent(batch.mail.subject) + '&body=' + encodeURIComponent(batch.mail.body);
+};
+$('yesSent').onclick = () => { if (!batch) return; const t = new Date().toISOString();
+  for (const it of S.items) if (batch.ids.includes(it.id)) it.sent = t;
+  persist(); batch = null; $('ovSent').classList.remove('on'); refresh(); toast('Marked as sent'); };
+$('notSent').onclick = () => { batch = null; $('ovSent').classList.remove('on'); };
+$('copyBody').onclick = async () => { try { await navigator.clipboard.writeText(batch.mail.body); toast('Letter copied'); } catch (e) { toast('Copy failed'); } };
+
+function openHist(id){ histId = id; const it = S.items.find(x => x.id === id);
+  $('hTxt').textContent = `${dmy(it.date)} ${it.date.slice(11)} · ${it.cat} › ${it.sub} · ${it.type==='out'?'spent':'received'} ${fmt(it.amount)} AED${it.note?' · '+it.note:''}`;
+  $('ovHist').classList.add('on'); }
+$('hAgain').onclick = () => { const it = S.items.find(x => x.id === histId); if (it) it.sent = null; persist(); refresh(); $('ovHist').classList.remove('on'); tab('list'); };
+$('hDel').onclick = () => { S.items = S.items.filter(x => x.id !== histId); persist(); refresh(); $('ovHist').classList.remove('on'); toast('Removed from phone'); };
+$('hClose').onclick = () => $('ovHist').classList.remove('on');
+
+function openSet(){ $('email').value = S.email; $('ovSet').classList.add('on'); }
+$('bSet').onclick = openSet; $('setClose').onclick = () => $('ovSet').classList.remove('on');
+$('setSave').onclick = () => { const v = $('email').value.trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { toast('Check the e-mail address'); return; }
+  S.email = v; persist(); $('ovSet').classList.remove('on'); toast('Saved'); };
+$('bkCopy').onclick = async () => { try { await navigator.clipboard.writeText(JSON.stringify(S)); toast('Backup copied'); } catch (e) { $('bkText').value = JSON.stringify(S); toast('Select the text and copy it'); } };
+$('bkRestore').onclick = () => { try { const d = JSON.parse($('bkText').value); if (!Array.isArray(d.items)) throw 0;
+  const have = new Set(S.items.map(x=>x.id)); let n = 0; for (const it of d.items) if (!have.has(it.id)) { S.items.push(it); n++; }
+  if (!S.email && d.email) S.email = d.email; persist(); refresh(); $('bkText').value = ''; toast(n + ' payments restored'); } catch (e) { toast('This is not a valid backup'); } };
+
+$('when').value = localIso(new Date());
+renderFavs(); refresh();
+if (!S.email) setTimeout(openSet, 300);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
